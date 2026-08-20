@@ -1,7 +1,6 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../src/app.module';
-import { ValidationPipe } from '@nestjs/common';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { NestFactory } = require('@nestjs/core');
+const { ValidationPipe } = require('@nestjs/common');
 const cookieParser = require('cookie-parser');
 
 // Ensure environment variables fallback
@@ -30,6 +29,8 @@ export default async function handler(req: any, res: any) {
 
   try {
     if (!cachedServer) {
+      // Import compiled JavaScript module from dist/src/app.module
+      const { AppModule } = require('../dist/src/app.module');
       const app = await NestFactory.create(AppModule, { logger: ['error', 'warn', 'log'] });
 
       app.enableCors({
@@ -51,7 +52,7 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({
       statusCode: 500,
       message: err.message || 'Internal Server Error',
-      error: 'ServerlessInvocationError',
+      error: err.stack || 'ServerlessInvocationError',
     });
   }
 }
