@@ -4,6 +4,12 @@ import { ValidationPipe } from '@nestjs/common';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieParser = require('cookie-parser');
 
+// Ensure environment variables fallback
+process.env.DATABASE_URL =
+  process.env.DATABASE_URL ||
+  'postgresql://postgres:Gofm50018kartik@db.rytpjptemiedslnnmlvh.supabase.co:5432/postgres';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt-key-2026';
+
 let cachedServer: any;
 
 export default async function handler(req: any, res: any) {
