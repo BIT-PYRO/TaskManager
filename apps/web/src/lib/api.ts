@@ -1,7 +1,10 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = rawApiUrl.replace(/\/+$/, '');
 
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
-  const url = `${API_URL}${endpoint}`;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${API_URL}${cleanEndpoint}`;
+
   const res = await fetch(url, {
     ...options,
     credentials: 'include',
