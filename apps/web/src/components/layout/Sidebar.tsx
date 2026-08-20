@@ -2,8 +2,8 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
-import { useState, useRef, useEffect } from 'react';
-import { CheckSquare, FolderOpen, ChevronDown, Settings, X } from 'lucide-react';
+import { useState } from 'react';
+import { CheckSquare, FolderOpen, ChevronDown, Settings, X, Layers } from 'lucide-react';
 import UserMenu from './UserMenu';
 
 interface SidebarProps {
@@ -23,52 +23,68 @@ export default function Sidebar({ onClose }: SidebarProps) {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-sidebar-bg border-r border-border-primary">
+    <div className="h-full flex flex-col bg-sidebar-bg border-r border-border-primary select-none">
       {/* User header */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-border-primary">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
-            {user?.name?.charAt(0) || 'D'}
+      <div className="relative flex items-center justify-between px-4 h-16 border-b border-border-primary shrink-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-amber-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">
+            {user?.name?.charAt(0)?.toUpperCase() || 'D'}
           </div>
-          <span className="text-sm font-semibold text-sidebar-text truncate">
-            {user?.name || 'Dexter'}
-          </span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-bold text-sidebar-text truncate">
+              {user?.name || 'Dexter'}
+            </span>
+            <span className="text-xs text-text-muted truncate">
+              {user?.title || 'Workspace Member'}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
+
+        <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className="p-1 hover:bg-hover-bg rounded transition-colors"
+            className="p-1.5 hover:bg-hover-bg rounded-lg text-text-muted hover:text-text-primary transition-colors"
             aria-label="User settings"
           >
-            <Settings className="w-4 h-4 text-text-muted" />
+            <Settings className="w-4 h-4" />
           </button>
           {onClose && (
-            <button onClick={onClose} className="p-1 hover:bg-hover-bg rounded lg:hidden">
-              <X className="w-4 h-4 text-text-muted" />
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-hover-bg rounded-lg text-text-muted lg:hidden"
+            >
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
+
+        {/* User menu dropdown */}
+        {userMenuOpen && (
+          <UserMenu onClose={() => setUserMenuOpen(false)} />
+        )}
       </div>
 
-      {/* User menu dropdown */}
-      {userMenuOpen && (
-        <UserMenu onClose={() => setUserMenuOpen(false)} />
-      )}
-
       {/* Workspace section */}
-      <div className="px-3 pt-4">
+      <div className="px-4 pt-5 pb-2">
         <button
           onClick={() => setWorkspaceOpen(!workspaceOpen)}
-          className="flex items-center justify-between w-full px-1 py-1 text-xs font-medium text-text-secondary uppercase tracking-wider"
+          className="flex items-center justify-between w-full text-xs font-bold text-text-muted uppercase tracking-wider hover:text-text-primary transition-colors"
         >
-          <span>Workspace</span>
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${workspaceOpen ? '' : '-rotate-90'}`} />
+          <span className="flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5" />
+            Workspace
+          </span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 transition-transform duration-200 ${
+              workspaceOpen ? '' : '-rotate-90'
+            }`}
+          />
         </button>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation Links */}
       {workspaceOpen && (
-        <nav className="px-3 mt-1 flex-1">
+        <nav className="px-3 mt-1 flex-1 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -79,14 +95,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
                   router.push(item.href);
                   onClose?.();
                 }}
-                className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-0.5 ${
+                className={`flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-sidebar-active text-text-primary'
-                    : 'text-sidebar-text hover:bg-hover-bg'
+                    ? 'bg-sidebar-active text-text-primary font-semibold shadow-xs'
+                    : 'text-sidebar-text hover:bg-hover-bg hover:text-text-primary'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                {item.label}
+                <Icon className={`w-4 h-4 ${isActive ? 'text-accent' : 'text-text-muted'}`} />
+                <span>{item.label}</span>
               </button>
             );
           })}

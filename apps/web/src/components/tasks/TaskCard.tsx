@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { MoreHorizontal, Calendar, Tag } from 'lucide-react';
 import { useState } from 'react';
 import TaskActions from './TaskActions';
+import PriorityBadge from '@/components/shared/PriorityBadge';
 
 interface TaskCardProps {
   task: any;
@@ -21,7 +22,7 @@ export default function TaskCard({ task, visibleFields }: TaskCardProps) {
 
   return (
     <div
-      className="bg-card-bg border border-card-border rounded-xl p-3.5 cursor-pointer hover:shadow-sm transition-shadow group"
+      className="relative bg-card-bg border border-card-border rounded-2xl p-4.5 cursor-pointer hover:border-accent/40 hover:shadow-md transition-all group"
       draggable
       onDragStart={(e) => {
         e.dataTransfer.setData('taskId', task.id);
@@ -29,51 +30,67 @@ export default function TaskCard({ task, visibleFields }: TaskCardProps) {
       }}
       onClick={() => router.push(`/tasks/${task.id}`)}
     >
-      {/* Title and actions */}
-      <div className="flex items-start justify-between gap-2 mb-2.5">
-        <h3 className="text-sm font-medium text-text-primary leading-snug">{task.title}</h3>
+      {/* Title & Actions Button */}
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <h3 className="text-sm font-bold text-text-primary leading-snug tracking-tight">
+          {task.title}
+        </h3>
         <button
-          onClick={(e) => { e.stopPropagation(); setActionsOpen(!actionsOpen); }}
-          className="p-0.5 opacity-0 group-hover:opacity-100 hover:bg-hover-bg rounded transition-all shrink-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            setActionsOpen(!actionsOpen);
+          }}
+          className="p-1 opacity-0 group-hover:opacity-100 hover:bg-hover-bg rounded-lg transition-all text-text-muted hover:text-text-primary shrink-0"
+          aria-label="Task options"
         >
-          <MoreHorizontal className="w-4 h-4 text-text-muted" />
+          <MoreHorizontal className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Member and Due Date row */}
-      <div className="flex items-center justify-between mb-2">
+      {/* Priority Badge */}
+      {visibleFields.priority && task.priority && task.priority !== 'none' && (
+        <div className="mb-3">
+          <PriorityBadge priority={task.priority} />
+        </div>
+      )}
+
+      {/* Member and Due Date Row */}
+      <div className="flex items-center justify-between gap-2 mb-3 pt-1 border-t border-border-secondary/60">
         {visibleFields.members && (
-          <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold">
-              {memberName.charAt(0)}
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-amber-500 flex items-center justify-center text-white text-[10px] font-bold shadow-xs shrink-0">
+              {memberName.charAt(0)?.toUpperCase()}
             </div>
-            <span className="text-xs text-text-secondary">{memberName}</span>
+            <span className="text-xs font-medium text-text-secondary truncate max-w-[110px]">
+              {memberName}
+            </span>
           </div>
         )}
+
         {visibleFields.dueDate && dueDate && (
-          <div className="flex items-center gap-1 text-red-500">
-            <Calendar className="w-3 h-3" />
-            <span className="text-xs font-medium">{dueDate}</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-semibold shrink-0">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>{dueDate}</span>
           </div>
         )}
       </div>
 
       {/* Labels */}
       {visibleFields.labels && labels.length > 0 && (
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap pt-1">
           {labels.map((label: any) => (
             <span
               key={label.id}
-              className="flex items-center gap-0.5 text-[11px] text-text-secondary bg-bg-tertiary px-1.5 py-0.5 rounded"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-secondary bg-bg-tertiary px-2 py-1 rounded-lg border border-border-primary"
             >
-              <Tag className="w-2.5 h-2.5" />
-              {label.name}
+              <Tag className="w-3 h-3 text-text-muted" />
+              <span>{label.name}</span>
             </span>
           ))}
         </div>
       )}
 
-      {/* Actions dropdown */}
+      {/* Actions Dropdown */}
       {actionsOpen && (
         <TaskActions
           task={task}

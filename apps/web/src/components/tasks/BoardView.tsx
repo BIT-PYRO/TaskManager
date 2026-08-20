@@ -44,56 +44,71 @@ export default function BoardView({ tasks, visibleFields, onAddTask }: BoardView
   };
 
   return (
-    <div className="flex gap-4 px-6 pb-6 overflow-x-auto h-full">
-      {STATUS_COLUMNS.map((col) => (
-        <div
-          key={col.key}
-          className="flex-shrink-0 w-[280px] flex flex-col"
-          onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('bg-accent/5'); }}
-          onDragLeave={(e) => { e.currentTarget.classList.remove('bg-accent/5'); }}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.currentTarget.classList.remove('bg-accent/5');
-            const taskId = e.dataTransfer.getData('taskId');
-            if (taskId) handleDrop(taskId, col.key);
-          }}
-        >
-          {/* Column header */}
-          <div className="flex items-center justify-between mb-3 px-1">
-            <div className="flex items-center gap-1.5">
-              <GripVertical className="w-4 h-4 text-text-muted" />
-              <span className="text-sm font-semibold text-text-primary">{col.label}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => onAddTask(col.key)}
-                className="p-0.5 hover:bg-hover-bg rounded transition-colors"
-              >
-                <Plus className="w-4 h-4 text-text-muted" />
-              </button>
-              <button className="p-0.5 hover:bg-hover-bg rounded transition-colors">
-                <MoreHorizontal className="w-4 h-4 text-text-muted" />
-              </button>
-            </div>
-          </div>
-
-          {/* Cards */}
-          <div className="flex-1 space-y-2.5 overflow-y-auto">
-            {columns[col.key]?.map((task) => (
-              <TaskCard key={task.id} task={task} visibleFields={visibleFields} />
-            ))}
-          </div>
-
-          {/* Add task button */}
-          <button
-            onClick={() => onAddTask(col.key)}
-            className="flex items-center gap-1.5 mt-2 px-2 py-2 text-sm text-text-muted hover:text-text-primary hover:bg-hover-bg rounded-lg transition-colors w-full"
+    <div className="flex gap-6 px-8 pb-8 overflow-x-auto h-full items-start select-none">
+      {STATUS_COLUMNS.map((col) => {
+        const colTasks = columns[col.key] || [];
+        return (
+          <div
+            key={col.key}
+            className="flex-shrink-0 w-80 bg-bg-secondary/60 border border-border-primary/80 rounded-2xl p-4 flex flex-col max-h-full transition-colors"
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.currentTarget.classList.add('ring-2', 'ring-accent/30', 'bg-accent/5');
+            }}
+            onDragLeave={(e) => {
+              e.currentTarget.classList.remove('ring-2', 'ring-accent/30', 'bg-accent/5');
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.currentTarget.classList.remove('ring-2', 'ring-accent/30', 'bg-accent/5');
+              const taskId = e.dataTransfer.getData('taskId');
+              if (taskId) handleDrop(taskId, col.key);
+            }}
           >
-            <Plus className="w-4 h-4" />
-            Add Task
-          </button>
-        </div>
-      ))}
+            {/* Column Header */}
+            <div className="flex items-center justify-between mb-4 px-1 shrink-0">
+              <div className="flex items-center gap-2">
+                <GripVertical className="w-4 h-4 text-text-muted" />
+                <span className="text-sm font-bold text-text-primary tracking-tight">{col.label}</span>
+                <span className="text-xs font-semibold text-text-muted bg-bg-tertiary px-2 py-0.5 rounded-full border border-border-primary">
+                  {colTasks.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => onAddTask(col.key)}
+                  className="p-1 hover:bg-hover-bg rounded-lg text-text-muted hover:text-text-primary transition-colors"
+                  title="Add Task"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+                <button
+                  className="p-1 hover:bg-hover-bg rounded-lg text-text-muted hover:text-text-primary transition-colors"
+                  title="Column Options"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Cards Container */}
+            <div className="flex-1 space-y-3.5 overflow-y-auto pr-1">
+              {colTasks.map((task) => (
+                <TaskCard key={task.id} task={task} visibleFields={visibleFields} />
+              ))}
+            </div>
+
+            {/* Add Task Button at bottom of column */}
+            <button
+              onClick={() => onAddTask(col.key)}
+              className="flex items-center justify-center gap-2 mt-4 px-3 py-2.5 text-sm font-semibold text-text-muted hover:text-text-primary hover:bg-hover-bg rounded-xl border border-dashed border-border-primary hover:border-text-muted transition-all w-full shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Task</span>
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

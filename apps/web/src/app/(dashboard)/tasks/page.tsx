@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import BoardView from '@/components/tasks/BoardView';
 import ListView from '@/components/tasks/ListView';
 import FieldsMenu from '@/components/tasks/FieldsMenu';
 import FilterMenu from '@/components/tasks/FilterMenu';
 import AddTaskModal from '@/components/tasks/AddTaskModal';
-import { Search, SlidersHorizontal, Filter, Plus, LayoutGrid, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Filter, Plus, LayoutGrid, List, X } from 'lucide-react';
 
 export default function TasksPage() {
   const queryClient = useQueryClient();
@@ -72,60 +72,82 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleViewChange(view === 'board' ? 'list' : 'board')}
-            className="p-1.5 hover:bg-hover-bg rounded transition-colors"
-            aria-label="Toggle view"
-          >
-            <LayoutGrid className="w-5 h-5 text-text-muted" />
-          </button>
-        </div>
-      </div>
+    <div className="h-full flex flex-col bg-bg-primary">
+      {/* Header Bar */}
+      <div className="px-8 pt-6 pb-5 border-b border-border-primary shrink-0 bg-bg-primary">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-text-primary tracking-tight">Tasks</h1>
+            <div className="flex items-center bg-bg-tertiary p-1 rounded-xl border border-border-primary ml-2">
+              <button
+                onClick={() => handleViewChange('board')}
+                className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  view === 'board'
+                    ? 'bg-card-bg text-text-primary shadow-xs'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+                title="Board View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden md:inline">Board</span>
+              </button>
+              <button
+                onClick={() => handleViewChange('list')}
+                className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  view === 'list'
+                    ? 'bg-card-bg text-text-primary shadow-xs'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+                <span className="hidden md:inline">List</span>
+              </button>
+            </div>
+          </div>
 
-      {/* Header */}
-      <div className="px-6 pt-4 pb-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-text-primary">Tasks</h1>
-
-          <div className="flex items-center gap-2">
-            {/* Search */}
+          {/* Action Toolbar */}
+          <div className="flex items-center gap-3">
+            {/* Search Input */}
             {searchOpen ? (
-              <div className="flex items-center gap-1 border border-border-primary rounded-lg px-2 py-1.5 bg-card-bg">
-                <Search className="w-4 h-4 text-text-muted" />
+              <div className="flex items-center gap-2 border border-border-primary rounded-xl px-3.5 py-2 bg-card-bg shadow-xs">
+                <Search className="w-4 h-4 text-text-muted shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search tasks..."
-                  className="bg-transparent text-sm text-text-primary outline-none w-40 placeholder:text-text-muted"
+                  className="bg-transparent text-sm text-text-primary outline-none w-48 placeholder:text-text-muted"
                   autoFocus
                 />
-                <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }}>
-                  <X className="w-3.5 h-3.5 text-text-muted" />
+                <button
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setSearchQuery('');
+                  }}
+                  className="p-0.5 hover:bg-hover-bg rounded text-text-muted"
+                >
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 hover:bg-hover-bg rounded-lg transition-colors"
+                className="p-2.5 border border-border-primary hover:bg-hover-bg rounded-xl text-text-muted hover:text-text-primary transition-colors bg-card-bg"
                 aria-label="Search"
               >
-                <Search className="w-4 h-4 text-text-muted" />
+                <Search className="w-4 h-4" />
               </button>
             )}
 
-            {/* Fields */}
+            {/* Fields Button */}
             <div className="relative">
               <button
                 onClick={() => setFieldsOpen(!fieldsOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border-primary rounded-lg hover:bg-hover-bg transition-colors text-text-primary"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold border border-border-primary rounded-xl hover:bg-hover-bg transition-colors text-text-primary bg-card-bg shadow-xs"
               >
-                <SlidersHorizontal className="w-4 h-4" />
-                Fields
+                <SlidersHorizontal className="w-4 h-4 text-text-muted" />
+                <span>Fields</span>
               </button>
               {fieldsOpen && (
                 <FieldsMenu
@@ -138,14 +160,19 @@ export default function TasksPage() {
               )}
             </div>
 
-            {/* Filter */}
+            {/* Filter Button */}
             <div className="relative">
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className="p-2 hover:bg-hover-bg rounded-lg transition-colors"
+                className={`flex items-center gap-2 px-3.5 py-2 text-sm font-semibold border border-border-primary rounded-xl hover:bg-hover-bg transition-colors bg-card-bg shadow-xs ${
+                  Object.keys(filters).length > 0 ? 'text-accent border-accent/40' : 'text-text-muted hover:text-text-primary'
+                }`}
                 aria-label="Filter"
               >
-                <Filter className="w-4 h-4 text-text-muted" />
+                <Filter className="w-4 h-4" />
+                {Object.keys(filters).length > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-accent" />
+                )}
               </button>
               {filterOpen && (
                 <FilterMenu
@@ -156,23 +183,23 @@ export default function TasksPage() {
               )}
             </div>
 
-            {/* Add Task */}
+            {/* Add Task Button */}
             <button
               onClick={() => handleAddTask()}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-text-primary text-bg-primary rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-5 py-2 bg-text-primary text-bg-primary rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              Add Task
+              <span>Add Task</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Main Board / List View Container */}
+      <div className="flex-1 min-h-0 overflow-hidden pt-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
+            <div className="animate-spin rounded-full h-9 w-9 border-3 border-accent border-t-transparent" />
           </div>
         ) : view === 'board' ? (
           <BoardView

@@ -39,105 +39,124 @@ export default function ListView({ tasks, visibleFields, onAddTask }: ListViewPr
   };
 
   return (
-    <div className="px-6 pb-6 overflow-y-auto h-full">
+    <div className="px-8 pb-8 overflow-y-auto h-full space-y-6 select-none">
       {STATUS_GROUPS.map((group) => {
         const groupTasks = grouped[group.key] || [];
         const isCollapsed = collapsed[group.key];
 
         return (
-          <div key={group.key} className="mb-4">
-            {/* Group header */}
-            <button
-              onClick={() => toggleCollapse(group.key)}
-              className="flex items-center gap-1.5 mb-2 text-sm font-semibold text-text-primary"
-            >
-              {isCollapsed ? (
-                <ChevronRight className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-              {group.label}
-            </button>
+          <div key={group.key} className="space-y-3">
+            {/* Group Header */}
+            <div className="flex items-center justify-between px-1">
+              <button
+                onClick={() => toggleCollapse(group.key)}
+                className="flex items-center gap-2 text-sm font-bold text-text-primary hover:text-accent transition-colors"
+              >
+                {isCollapsed ? (
+                  <ChevronRight className="w-4 h-4 text-text-muted" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-text-muted" />
+                )}
+                <span>{group.label}</span>
+                <span className="text-xs font-semibold text-text-muted bg-bg-tertiary px-2 py-0.5 rounded-full border border-border-primary ml-1">
+                  {groupTasks.length}
+                </span>
+              </button>
+            </div>
 
             {!isCollapsed && (
-              <>
-                {/* Table */}
-                <div className="border border-card-border rounded-xl overflow-hidden bg-card-bg">
-                  {/* Table header */}
-                  <div className="grid gap-4 px-4 py-2.5 bg-bg-secondary border-b border-border-primary text-xs font-medium text-text-secondary uppercase tracking-wider"
+              <div className="space-y-2">
+                {/* Table Container */}
+                <div className="border border-card-border rounded-2xl overflow-hidden bg-card-bg shadow-xs">
+                  {/* Table Header */}
+                  <div
+                    className="grid gap-4 px-6 py-3 bg-bg-secondary/70 border-b border-border-primary text-xs font-bold text-text-muted uppercase tracking-wider items-center"
                     style={{
-                      gridTemplateColumns: `1fr ${visibleFields.priority ? '120px' : ''} ${visibleFields.members ? '100px' : ''} ${visibleFields.dueDate ? '130px' : ''} 60px`,
+                      gridTemplateColumns: `1fr ${visibleFields.priority ? '140px' : ''} ${visibleFields.members ? '140px' : ''} ${visibleFields.dueDate ? '140px' : ''} 60px`,
                     }}
                   >
-                    <span>Task</span>
+                    <span>Task Title</span>
                     {visibleFields.priority && <span>Priority</span>}
-                    {visibleFields.members && <span>Members</span>}
+                    {visibleFields.members && <span>Assignee</span>}
                     {visibleFields.dueDate && <span>Due Date</span>}
-                    <span>Actions</span>
+                    <span className="text-right">Actions</span>
                   </div>
 
-                  {/* Table rows */}
-                  {groupTasks.map((task) => {
-                    const memberName = task.members?.[0]?.user?.name || task.reporter?.name || 'Admin';
-                    const memberInitials = memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+                  {/* Table Rows */}
+                  {groupTasks.length === 0 ? (
+                    <div className="px-6 py-8 text-center text-sm text-text-muted">
+                      No tasks in this section.
+                    </div>
+                  ) : (
+                    groupTasks.map((task) => {
+                      const memberName = task.members?.[0]?.user?.name || task.reporter?.name || 'Admin';
+                      const memberInitials = memberName.charAt(0)?.toUpperCase() || 'A';
 
-                    return (
-                      <div
-                        key={task.id}
-                        className="grid gap-4 px-4 py-3 border-b border-border-secondary last:border-b-0 hover:bg-hover-bg cursor-pointer items-center"
-                        style={{
-                          gridTemplateColumns: `1fr ${visibleFields.priority ? '120px' : ''} ${visibleFields.members ? '100px' : ''} ${visibleFields.dueDate ? '130px' : ''} 60px`,
-                        }}
-                        onClick={() => router.push(`/tasks/${task.id}`)}
-                      >
-                        <span className="text-sm text-text-primary font-medium truncate">{task.title}</span>
-
-                        {visibleFields.priority && (
-                          <PriorityBadge priority={task.priority} />
-                        )}
-
-                        {visibleFields.members && (
-                          <div className="flex items-center">
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold">
-                              {memberInitials}
-                            </div>
-                          </div>
-                        )}
-
-                        {visibleFields.dueDate && (
-                          <span className="text-sm text-text-secondary">
-                            {task.dueDate ? format(new Date(task.dueDate), 'dd MMM yyyy') : '—'}
+                      return (
+                        <div
+                          key={task.id}
+                          className="grid gap-4 px-6 py-4 border-b border-border-secondary/60 last:border-b-0 hover:bg-hover-bg/80 transition-colors cursor-pointer items-center group"
+                          style={{
+                            gridTemplateColumns: `1fr ${visibleFields.priority ? '140px' : ''} ${visibleFields.members ? '140px' : ''} ${visibleFields.dueDate ? '140px' : ''} 60px`,
+                          }}
+                          onClick={() => router.push(`/tasks/${task.id}`)}
+                        >
+                          <span className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors truncate">
+                            {task.title}
                           </span>
-                        )}
 
-                        <div className="relative">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveActions(activeActions === task.id ? null : task.id);
-                            }}
-                            className="p-1 hover:bg-hover-bg rounded"
-                          >
-                            <MoreHorizontal className="w-4 h-4 text-text-muted" />
-                          </button>
-                          {activeActions === task.id && (
-                            <TaskActions task={task} onClose={() => setActiveActions(null)} />
+                          {visibleFields.priority && (
+                            <div>
+                              <PriorityBadge priority={task.priority} />
+                            </div>
                           )}
+
+                          {visibleFields.members && (
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                                {memberInitials}
+                              </div>
+                              <span className="text-xs font-medium text-text-secondary truncate">
+                                {memberName}
+                              </span>
+                            </div>
+                          )}
+
+                          {visibleFields.dueDate && (
+                            <span className="text-xs font-medium text-text-secondary">
+                              {task.dueDate ? format(new Date(task.dueDate), 'dd MMM yyyy') : '—'}
+                            </span>
+                          )}
+
+                          <div className="relative text-right">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveActions(activeActions === task.id ? null : task.id);
+                              }}
+                              className="p-1.5 hover:bg-hover-bg rounded-lg text-text-muted hover:text-text-primary transition-colors"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                            {activeActions === task.id && (
+                              <TaskActions task={task} onClose={() => setActiveActions(null)} />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
 
-                {/* Add task */}
+                {/* Add Task Button */}
                 <button
                   onClick={() => onAddTask(group.key)}
-                  className="flex items-center gap-1.5 mt-2 px-2 py-1.5 text-sm text-text-muted hover:text-text-primary transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-text-muted hover:text-text-primary hover:bg-hover-bg rounded-xl border border-dashed border-border-primary hover:border-text-muted transition-all w-full justify-center"
                 >
                   <Plus className="w-4 h-4" />
-                  Add Task
+                  <span>Add Task to {group.label}</span>
                 </button>
-              </>
+              </div>
             )}
           </div>
         );
